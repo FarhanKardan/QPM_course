@@ -34,27 +34,28 @@ def main():
     qty = min_amount(ex, a.symbol, bid * 0.7)
     print(f"{a.symbol}  bid={bid}  ask={ask}  spread={(ask - bid) / bid * 1e4:.1f} bps  qty={qty:.6f}\n")
 
+    # (name, send, cancel afterwards?, is a trigger order?)
     plan = [
-        ("LIMIT GTC", lambda: orders.limit(ex, a.symbol, "buy", qty, bid * 0.7), True),
-        ("POST-ONLY", lambda: orders.post_only(ex, a.symbol, "buy", qty, ask), False),
-        ("IOC", lambda: orders.ioc(ex, a.symbol, "buy", qty, bid * 0.7), False),
-        ("FOK", lambda: orders.fok(ex, a.symbol, "buy", qty, bid * 0.7), False),
+        ("LIMIT GTC", lambda: orders.limit(ex, a.symbol, "buy", qty, bid * 0.7), True, False),
+        ("POST-ONLY", lambda: orders.post_only(ex, a.symbol, "buy", qty, ask), False, False),
+        ("IOC", lambda: orders.ioc(ex, a.symbol, "buy", qty, bid * 0.7), False, False),
+        ("FOK", lambda: orders.fok(ex, a.symbol, "buy", qty, bid * 0.7), False, False),
         ("STOP-LIMIT", lambda: orders.stop_limit(ex, a.symbol, "buy", qty,
-                                                 ask * 1.31, ask * 1.30), True),
+                                                 ask * 1.31, ask * 1.30), True, True),
     ]
     if not a.send:
         for name, *_ in plan:
             print(f"[dry-run] would send {name}")
         return
 
-    for name, send, needs_cancel in plan:
+    for name, send, needs_cancel, trigger in plan:
         try:
             o = send()
             time.sleep(1)
-            o = ex.fetch_order(o["id"], a.symbol)
+            o = orders.status(ex, o["id"], a.symbol, trigger)
             show(name, o)
-            if needs_cancel and o["status"] == "open":
-                orders.cancel(ex, o["id"], a.symbol)
+            if needs_cancel and o["status"] in ("open", "unknown"):
+                orders.cancel(ex, o["id"], a.symbol, trigger)
                 print(f"{'':<12} cancelled")
         except Exception as e:  # post-only at the ask is *expected* to fail
             print(f"{name:<12} rejected: {type(e).__name__}: {str(e)[:90]}")

@@ -33,7 +33,7 @@ def limit(ex, symbol, side, amount, price):
 
 
 def post_only(ex, symbol, side, amount, price):
-    """Maker-only: rejected if it would cross the spread (Binance: LIMIT_MAKER)."""
+    """Maker-only: rejected/cancelled if it would cross the spread."""
     amount, price = _prep(ex, symbol, amount, price)
     return ex.create_order(symbol, "limit", side, amount, price,
                            {"postOnly": True, "clientOrderId": _cid("po")})
@@ -61,8 +61,19 @@ def stop_limit(ex, symbol, side, amount, price, trigger):
                            {"triggerPrice": trigger, "clientOrderId": _cid("stp")})
 
 
-def cancel(ex, order_id, symbol):
-    return ex.cancel_order(order_id, symbol)
+def cancel(ex, order_id, symbol, trigger=False):
+    return ex.cancel_order(order_id, symbol, {"trigger": True} if trigger else {})
+
+
+def status(ex, order_id, symbol, trigger=False):
+    """Look an order up as open first, then as closed (Bybit keeps them apart)."""
+    params = {"trigger": True} if trigger else {}
+    for fn in ("fetch_open_order", "fetch_closed_order", "fetch_order"):
+        try:
+            return getattr(ex, fn)(order_id, symbol, params)
+        except Exception:
+            continue
+    return {"id": order_id, "status": "unknown", "filled": None}
 
 
 def twap(ex, symbol, side, total, slices, interval_s, dry_run=True):

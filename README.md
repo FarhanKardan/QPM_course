@@ -11,12 +11,15 @@
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env      # کلیدهای Binance Spot Testnet را وارد کن
+cp .env.example .env      # کلیدهای Bybit Testnet را وارد کن
 ```
 
-کلید testnet: به [testnet.binance.vision](https://testnet.binance.vision) برو، با GitHub وارد شو و «Generate HMAC_SHA256 Key» را بزن. پول تستی خودکار شارژ می‌شود.
+کلید testnet:
+1. در [testnet.bybit.com](https://testnet.bybit.com) با ایمیل ثبت‌نام کن (حساب جدا از Bybit اصلی، بدون KYC).
+2. از بخش Assets پول تستی (USDT) بگیر.
+3. از منوی پروفایل وارد API شو و یک کلید System-generated با دسترسی Read-Write بساز.
 
-> سفارش‌ها فقط به **testnet** می‌روند (`SANDBOX = True` در `config.py`). داده‌ی تاریخی از API عمومی بایننس اصلی خوانده می‌شود و کلید نمی‌خواهد.
+> سفارش‌ها فقط به **testnet** می‌روند (`SANDBOX = True` در `config.py`). داده‌ی تاریخی از API عمومی Bybit اصلی خوانده می‌شود و کلید نمی‌خواهد.
 
 ## قدم‌ها
 
@@ -84,6 +87,6 @@ qpm/
 
 ## صرافی دیگر
 
-`EXCHANGE = "bybit"` در `config.py` و کلید testnet بای‌بیت در `.env`. کد با پارامترهای یکپارچه‌ی ccxt نوشته شده است.
+`EXCHANGE = "binance"` یا `"okx"` در `config.py` و کلید testnet همان صرافی در `.env`. کد با پارامترهای یکپارچه‌ی ccxt نوشته شده است.
 
 > این کد آموزشی است، نه توصیه‌ی سرمایه‌گذاری.

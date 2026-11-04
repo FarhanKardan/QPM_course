@@ -1,6 +1,6 @@
 """All knobs of the lab in one place."""
 
-EXCHANGE = "binance"        # any ccxt id with a testnet, e.g. "bybit"
+EXCHANGE = "bybit"          # any ccxt id with a testnet (bybit, binance, okx)
 SANDBOX = True              # True = testnet (fake money) for orders
 QUOTE = "USDT"              # trade only XXX/USDT pairs
 N_ASSETS = 8                # how many symbols to pick by 24h volume
