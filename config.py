@@ -6,7 +6,8 @@ EXECUTION = "paper"         # "paper"  = simulate orders on the live order book,
 TESTNET_EXCHANGE = "okx"    # okx demo trading, bybit, binance... whichever works for you
 QUOTE = "USDT"              # trade only XXX/USDT pairs
 N_ASSETS = 8                # how many symbols to pick by 24h volume
-EXCLUDE = {"USDC", "USDT", "DAI", "TUSD", "FDUSD", "USDD", "PYUSD", "EUR", "BUSD"}
+EXCLUDE = {"USDC", "USDT", "DAI", "TUSD", "FDUSD", "USDD", "PYUSD", "EUR", "BUSD",
+           "USDE", "USD1", "RLUSD", "USDTB", "PAXG", "XAUT", "WBTC", "STETH"}  # stables, gold, wrapped
 
 TIMEFRAME = "1h"
 HISTORY_DAYS = 180          # history used for backtests

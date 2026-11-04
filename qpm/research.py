@@ -12,13 +12,17 @@ from qpm.strategy import PortfolioStrategy
 def grid_search(prices, models, lookbacks, rebalances, train_frac=0.7, metric="sharpe"):
     """Pick parameters on the first 70% of history, then check them on the last 30%."""
     split = int(len(prices) * train_frac)
+    test_start = prices.index[split]
+    # the test run starts early only so the model has history; we score from test_start
     train, test = prices.iloc[:split], prices.iloc[split - max(lookbacks):]
     rows = []
     for m, lb, rb in itertools.product(models, lookbacks, rebalances):
         s = PortfolioStrategy(m, lb, rb)
+        eq_train = vbt.run(train, s).iloc[lb:]          # skip the warm-up with no position
+        eq_test = vbt.run(test, s).loc[test_start:]
         rows.append({"model": m, "lookback": lb, "rebalance": rb,
-                     f"train_{metric}": summary(vbt.run(train, s))[metric],
-                     f"test_{metric}": summary(vbt.run(test, s))[metric]})
+                     f"train_{metric}": summary(eq_train)[metric],
+                     f"test_{metric}": summary(eq_test)[metric]})
     return pd.DataFrame(rows).sort_values(f"train_{metric}", ascending=False)
 
 

@@ -31,6 +31,10 @@ class LiveBroker:
         if self.dry_run:
             print(f"[dry-run] IOC {side} {amount:.6f} {order.symbol} @ {price:.4f}")
             return None
-        o = orders.ioc(self.ex, order.symbol, side, amount, price)
+        try:
+            o = orders.ioc(self.ex, order.symbol, side, amount, price)
+        except Exception as e:      # one rejected order must not stop the rebalance
+            print(f"FAILED IOC {side} {order.symbol}: {type(e).__name__}: {str(e)[:100]}")
+            return None
         print(f"sent IOC {side} {order.symbol}: filled {o.get('filled') or 0:.6g} / {amount:.6g}")
         return o

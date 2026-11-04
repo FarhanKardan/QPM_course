@@ -21,8 +21,11 @@ def _cid(tag):
 def market(ex, symbol, side, amount):
     """Fill now at whatever the book offers. You pay the spread + slippage."""
     amount, _ = _prep(ex, symbol, amount)
-    return ex.create_order(symbol, "market", side, amount,
-                           params={"clientOrderId": _cid("mkt")})
+    # Some exchanges (OKX) size a market BUY in quote currency; ccxt converts
+    # amount x price into that cost, so we pass the current ask as `price`.
+    price = ex.fetch_order_book(symbol, limit=5)["asks"][0][0] if side == "buy" else None
+    return ex.create_order(symbol, "market", side, amount, price,
+                           {"clientOrderId": _cid("mkt")})
 
 
 def limit(ex, symbol, side, amount, price):

@@ -25,7 +25,10 @@ def balances_table(ex, prices_ex):
     for coin, qty in ex.fetch_balance()["total"].items():
         if not qty or abs(qty) < 1e-12:
             continue
-        price = 1.0 if coin == config.QUOTE else prices_ex.fetch_ticker(f"{coin}/{config.QUOTE}")["last"]
+        try:
+            price = 1.0 if coin == config.QUOTE else prices_ex.fetch_ticker(f"{coin}/{config.QUOTE}")["last"]
+        except Exception:           # e.g. a demo coin with no USDT market
+            continue
         rows.append({"coin": coin, "amount": qty, "price": price, "value_usdt": qty * price})
     df = pd.DataFrame(rows).sort_values("value_usdt", ascending=False)
     df["weight"] = df["value_usdt"] / df["value_usdt"].sum()
