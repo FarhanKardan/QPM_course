@@ -32,5 +32,5 @@ class LiveBroker:
             print(f"[dry-run] IOC {side} {amount:.6f} {order.symbol} @ {price:.4f}")
             return None
         o = orders.ioc(self.ex, order.symbol, side, amount, price)
-        print(f"sent IOC {side} {order.symbol}: filled {o.get('filled')} / {amount:.6f}")
+        print(f"sent IOC {side} {order.symbol}: filled {o.get('filled') or 0:.6g} / {amount:.6g}")
         return o

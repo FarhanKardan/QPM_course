@@ -41,6 +41,7 @@ pip install -r requirements.txt
 | ۵ | `05_optimize.py` | انتخاب مدل و پارامترها روی train و سنجش روی test |
 | ۶ | `06_monte_carlo.py` | توزیع بازده و افت سرمایه‌ی یک‌ساله با bootstrap |
 | ۷ | `07_live.py` | اجرای زنده: هر N ساعت بهینه‌سازی دوباره و معامله‌ی اختلاف |
+| ۸ | `08_account.py` | «صفحه‌ی صرافی» حساب کاغذی: موجودی، سفارش‌های باز و تاریخچه (ترمینال و HTML) |
 
 ```bash
 python 01_order_types.py            # فقط نشان می‌دهد چه می‌فرستد
@@ -52,6 +53,7 @@ python 05_optimize.py
 python 06_monte_carlo.py
 python 07_live.py --once            # یک ریبالانس، dry-run
 python 07_live.py --once --send     # یک ریبالانس روی حساب کاغذی (یا testnet)
+python 08_account.py                # موجودی و سفارش‌ها؛ --reset برای شروع از صفر
 ```
 
 بدون اینترنت؟ قدم‌های ۳ تا ۶ را با `--synthetic` روی داده‌ی ساختگی اجرا کن.
