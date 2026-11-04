@@ -1,7 +1,8 @@
-"""Exchange connection through ccxt. Keys come from the .env file.
+"""Exchange connections through ccxt.
 
-Orders go to the testnet (config.SANDBOX). Historical data always comes
-from the real exchange's public API, which needs no keys.
+Two clients:
+  * public_exchange(): real DATA_EXCHANGE, no keys -> tickers and candles
+  * get_exchange():    ORDER_EXCHANGE testnet, with keys from .env -> orders
 """
 import os
 
@@ -12,11 +13,13 @@ import config
 
 
 def get_exchange(auth: bool = False, sandbox: bool = config.SANDBOX):
+    """The exchange orders go to (testnet by default)."""
     load_dotenv()
     params = {"enableRateLimit": True, "options": {"defaultType": "spot"}}
     if auth:
+        # Deribit calls these Client ID / Client Secret
         params.update(apiKey=os.environ["API_KEY"], secret=os.environ["API_SECRET"])
-    ex = getattr(ccxt, config.EXCHANGE)(params)
+    ex = getattr(ccxt, config.ORDER_EXCHANGE)(params)
     if sandbox:
         ex.set_sandbox_mode(True)
     ex.load_markets()
@@ -24,8 +27,22 @@ def get_exchange(auth: bool = False, sandbox: bool = config.SANDBOX):
 
 
 def public_exchange():
-    """Real-exchange client without keys: tickers and candles only."""
-    return get_exchange(auth=False, sandbox=False)
+    """Real data exchange without keys: tickers and candles only."""
+    ex = getattr(ccxt, config.DATA_EXCHANGE)({"enableRateLimit": True,
+                                              "options": {"defaultType": "spot"}})
+    ex.load_markets()
+    return ex
+
+
+def tradable_bases(order_ex) -> set:
+    """Coins that have a spot XXX/ORDER_QUOTE market on the order exchange."""
+    return {m["base"] for m in order_ex.markets.values()
+            if m.get("spot") and m["quote"] == config.ORDER_QUOTE and m.get("active", True)}
+
+
+def to_order_symbol(data_symbol: str) -> str:
+    """BTC/USDT (data) -> BTC/USDC (orders)."""
+    return f"{data_symbol.split('/')[0]}/{config.ORDER_QUOTE}"
 
 
 def min_amount(ex, symbol: str, price: float) -> float:

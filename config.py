@@ -1,8 +1,12 @@
 """All knobs of the lab in one place."""
 
-EXCHANGE = "bybit"          # any ccxt id with a testnet (bybit, binance, okx)
+# Data and orders can come from different exchanges.
+# From the UAE: Bybit/OKX public data works; Deribit testnet accepts orders.
+DATA_EXCHANGE = "bybit"     # public candles and tickers, no keys
+QUOTE = "USDT"              # data symbols are XXX/USDT
+ORDER_EXCHANGE = "deribit"  # where orders go (any ccxt id with a testnet)
+ORDER_QUOTE = "USDC"        # Deribit spot pairs are XXX/USDC (~ same price as USDT)
 SANDBOX = True              # True = testnet (fake money) for orders
-QUOTE = "USDT"              # trade only XXX/USDT pairs
 N_ASSETS = 8                # how many symbols to pick by 24h volume
 EXCLUDE = {"USDC", "USDT", "DAI", "TUSD", "FDUSD", "USDD", "PYUSD", "EUR", "BUSD"}
 

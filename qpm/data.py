@@ -10,14 +10,19 @@ import config
 LEVERAGED = ("3L", "3S", "2L", "2S", "UP", "DOWN")
 
 
-def select_universe(ex, n=config.N_ASSETS):
-    """Top-n USDT pairs by 24h quote volume, without stablecoins or leveraged tokens."""
+def select_universe(ex, n=config.N_ASSETS, allowed_bases=None):
+    """Top-n USDT pairs by 24h quote volume, without stablecoins or leveraged tokens.
+
+    allowed_bases: only coins we can also trade on the order exchange.
+    """
     rows = []
     for sym, t in ex.fetch_tickers().items():
         if not sym.endswith("/" + config.QUOTE) or sym not in ex.markets:
             continue
         base = sym.split("/")[0]
         if base in config.EXCLUDE or base.endswith(LEVERAGED):
+            continue
+        if allowed_bases is not None and base not in allowed_bases:
             continue
         rows.append((sym, t.get("quoteVolume") or 0))
     rows.sort(key=lambda r: r[1], reverse=True)
