@@ -11,15 +11,24 @@
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env      # کلیدهای Bybit Testnet را وارد کن
 ```
 
-کلید testnet:
-1. در [testnet.bybit.com](https://testnet.bybit.com) با ایمیل ثبت‌نام کن (حساب جدا از Bybit اصلی، بدون KYC).
-2. از بخش Assets پول تستی (USDT) بگیر.
-3. از منوی پروفایل وارد API شو و یک کلید System-generated با دسترسی Read-Write بساز.
+**حالت پیش‌فرض: Paper Trading.** سفارش‌ها روی اردربوک **زنده‌ی Bybit** شبیه‌سازی می‌شوند و هیچ حساب، کلید یا ثبت‌نامی لازم نیست. موجودی حساب کاغذی (۱۰٬۰۰۰ USDT) در `data/paper_account.json` می‌ماند؛ برای شروع از صفر، این فایل را پاک کن.
 
-> سفارش‌ها فقط به **testnet** می‌روند (`SANDBOX = True` در `config.py`). داده‌ی تاریخی از API عمومی Bybit اصلی خوانده می‌شود و کلید نمی‌خواهد.
+قوانین شبیه‌سازی (`qpm/paper.py`):
+
+| سفارش | رفتار |
+|---|---|
+| Market | روی سطوح اردربوک راه می‌رود تا کامل پر شود |
+| Limit | بخشی که الان کراس می‌کند پر می‌شود، بقیه در دفتر می‌ماند |
+| Post-only | اگر کراس کند رد می‌شود |
+| IOC | آنچه الان ممکن است پر می‌شود، بقیه کنسل |
+| FOK | همه یا هیچ |
+| Stop-limit | تا قیمت به trigger نرسد فعال نمی‌شود |
+
+**حالت testnet (اختیاری):** اگر حساب دمو در یک صرافی داری، در `config.py` بگذار `EXECUTION = "testnet"` و `TESTNET_EXCHANGE` را تنظیم کن (پیش‌فرض OKX Demo Trading). بعد `cp .env.example .env` و کلیدها را وارد کن.
+
+> داده‌ی تاریخی و اردربوک از API عمومی Bybit خوانده می‌شود که از امارات باز است و کلید نمی‌خواهد.
 
 ## قدم‌ها
 
@@ -35,14 +44,14 @@ cp .env.example .env      # کلیدهای Bybit Testnet را وارد کن
 
 ```bash
 python 01_order_types.py            # فقط نشان می‌دهد چه می‌فرستد
-python 01_order_types.py --send     # ارسال واقعی به testnet (قیمت‌ها دور از بازار)
+python 01_order_types.py --send     # ارسال به حساب کاغذی (یا testnet)
 python 02_universe_and_data.py
 python 03_backtest_vectorized.py
 python 04_backtest_event.py
 python 05_optimize.py
 python 06_monte_carlo.py
 python 07_live.py --once            # یک ریبالانس، dry-run
-python 07_live.py --once --send     # یک ریبالانس واقعی روی testnet
+python 07_live.py --once --send     # یک ریبالانس روی حساب کاغذی (یا testnet)
 ```
 
 بدون اینترنت؟ قدم‌های ۳ تا ۶ را با `--synthetic` روی داده‌ی ساختگی اجرا کن.
@@ -62,7 +71,8 @@ python 07_live.py --once --send     # یک ریبالانس واقعی روی te
 
 ```
 qpm/
-├── exchange.py            اتصال ccxt (testnet برای سفارش، عمومی برای داده)
+├── exchange.py            اتصال ccxt: داده‌ی عمومی، و مقصد سفارش (paper یا testnet)
+├── paper.py               صرافی کاغذی روی اردربوک زنده
 ├── orders.py              یک تابع برای هر نوع سفارش + TWAP
 ├── data.py                انتخاب نماد و دانلود داده
 ├── models.py              مدل‌های وزن‌دهی
@@ -87,6 +97,6 @@ qpm/
 
 ## صرافی دیگر
 
-`EXCHANGE = "binance"` یا `"okx"` در `config.py` و کلید testnet همان صرافی در `.env`. کد با پارامترهای یکپارچه‌ی ccxt نوشته شده است.
+منبع داده: `EXCHANGE` در `config.py`. مقصد سفارش در حالت testnet: `TESTNET_EXCHANGE`. کد با پارامترهای یکپارچه‌ی ccxt نوشته شده است.
 
 > این کد آموزشی است، نه توصیه‌ی سرمایه‌گذاری.

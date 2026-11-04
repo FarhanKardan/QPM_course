@@ -1,7 +1,9 @@
 """All knobs of the lab in one place."""
 
-EXCHANGE = "bybit"          # any ccxt id with a testnet (bybit, binance, okx)
-SANDBOX = True              # True = testnet (fake money) for orders
+EXCHANGE = "bybit"          # market data (public, no keys) and, in paper mode, the order book we simulate on
+EXECUTION = "paper"         # "paper"  = simulate orders on the live order book, no account needed
+                            # "testnet" = send to TESTNET_EXCHANGE's testnet/demo with keys from .env
+TESTNET_EXCHANGE = "okx"    # okx demo trading, bybit, binance... whichever works for you
 QUOTE = "USDT"              # trade only XXX/USDT pairs
 N_ASSETS = 8                # how many symbols to pick by 24h volume
 EXCLUDE = {"USDC", "USDT", "DAI", "TUSD", "FDUSD", "USDD", "PYUSD", "EUR", "BUSD"}

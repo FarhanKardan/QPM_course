@@ -1,7 +1,9 @@
-"""Exchange connection through ccxt. Keys come from the .env file.
+"""Exchange connections through ccxt.
 
-Orders go to the testnet (config.SANDBOX). Historical data always comes
-from the real exchange's public API, which needs no keys.
+  public_exchange(): the real EXCHANGE, no keys -> tickers, candles, order book
+  get_exchange():    where orders go
+                     paper   -> PaperExchange on top of the live order book (no account)
+                     testnet -> TESTNET_EXCHANGE testnet/demo with keys from .env
 """
 import os
 
@@ -11,21 +13,30 @@ from dotenv import load_dotenv
 import config
 
 
-def get_exchange(auth: bool = False, sandbox: bool = config.SANDBOX):
-    load_dotenv()
-    params = {"enableRateLimit": True, "options": {"defaultType": "spot"}}
-    if auth:
-        params.update(apiKey=os.environ["API_KEY"], secret=os.environ["API_SECRET"])
-    ex = getattr(ccxt, config.EXCHANGE)(params)
-    if sandbox:
-        ex.set_sandbox_mode(True)
+def public_exchange():
+    """Real exchange without keys: tickers, candles and order books."""
+    ex = getattr(ccxt, config.EXCHANGE)({"enableRateLimit": True,
+                                         "options": {"defaultType": "spot"}})
     ex.load_markets()
     return ex
 
 
-def public_exchange():
-    """Real-exchange client without keys: tickers and candles only."""
-    return get_exchange(auth=False, sandbox=False)
+def get_exchange(auth: bool = False):
+    """The exchange orders go to, chosen by config.EXECUTION."""
+    if config.EXECUTION == "paper":
+        from qpm.paper import PaperExchange
+        return PaperExchange(public_exchange())
+
+    load_dotenv()
+    params = {"enableRateLimit": True, "options": {"defaultType": "spot"}}
+    if auth:
+        params.update(apiKey=os.environ["API_KEY"], secret=os.environ["API_SECRET"])
+        if os.environ.get("API_PASSWORD"):          # OKX calls it passphrase
+            params["password"] = os.environ["API_PASSWORD"]
+    ex = getattr(ccxt, config.TESTNET_EXCHANGE)(params)
+    ex.set_sandbox_mode(True)                       # testnet / demo trading
+    ex.load_markets()
+    return ex
 
 
 def min_amount(ex, symbol: str, price: float) -> float:

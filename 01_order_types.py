@@ -1,13 +1,13 @@
-"""Step 1 — every order type on the testnet, safely.
+"""Step 1 — every order type, safely (paper account by default, or a testnet).
 
 Prices are set far from the market, so nothing fills by accident:
   limit / stop-limit  -> rest in the book, then we cancel them
   post-only at the ask -> rejected (it would be a taker)
   IOC / FOK far away  -> cancelled / killed instantly
-Only `--market` sends a real (tiny, testnet) market order.
+Only `--market` sends an order that really fills (tiny size).
 
     python 01_order_types.py                # print what would be sent
-    python 01_order_types.py --send         # send to testnet
+    python 01_order_types.py --send         # send (paper or testnet, see config.EXECUTION)
     python 01_order_types.py --send --market
 """
 import argparse
@@ -24,7 +24,7 @@ def show(name, o):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--symbol", default="BTC/USDT")
-    p.add_argument("--send", action="store_true", help="really send to the testnet")
+    p.add_argument("--send", action="store_true", help="send to the paper account / testnet")
     p.add_argument("--market", action="store_true", help="also send one tiny market order")
     a = p.parse_args()
 
