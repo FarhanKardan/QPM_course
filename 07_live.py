@@ -45,6 +45,14 @@ def main():
     strategy = PortfolioStrategy()
     broker = LiveBroker(get_exchange(auth=True), dry_run=not a.send)
     data_ex = public_exchange()
+
+    # the universe comes from the data exchange; the execution venue may not list every pair
+    missing = [s for s in symbols if s not in broker.ex.markets]
+    if missing:
+        print(f"not tradable on the execution exchange, dropped: {missing}")
+        symbols = [s for s in symbols if s in broker.ex.markets]
+    if not symbols:
+        raise SystemExit("no tradable symbols left")
     print(f"live: {strategy} on {symbols}  ({'SEND' if a.send else 'dry-run'})")
 
     if a.once:
